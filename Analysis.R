@@ -30,8 +30,14 @@ load(here("data", "tat_most_countries_aggregate.RData"))
 class(tat_most_countries_aggregate$views_ceil)
 class(tat_most_countries_aggregate)
 tat_most_countries_aggregate$year <- str_extract_all(pattern = "(\\d{4})", string =  tat_most_countries_aggregate$period)
-check_countries <- tat_most_countries_aggregate %>% group_by(country, year) %>% transmute(n_views= views_ceil)
+tat_most_countries_aggregate$year <- unlist(tat_most_countries_aggregate$year)
+class(tat_most_countries_aggregate$country)
+class(tat_most_countries_aggregate$year)
 
+check_countries <- tat_most_countries_aggregate %>% group_by(country, year) %>% transmute(n_views=sum(views_ceil)) %>% 
+  slice_head(n=1) %>% filter(country !="--")
+n_distinct(check_countries$country)
+save(check_countries, file = "Figures/check_countries.RData")
 
 ### Which articles are the most popular by year?
 load(here("data", "tat_most_test_2015_2023.RData")) # here, I have to focus on titles without "word:"
