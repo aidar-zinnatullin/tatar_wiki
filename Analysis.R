@@ -38,10 +38,33 @@ check_countries <- tat_most_countries_aggregate %>% group_by(country, year) %>% 
   slice_head(n=1) %>% filter(country !="--")
 n_distinct(check_countries$country)
 save(check_countries, file = "Figures/check_countries.RData")
+load(here("Figures", "check_countries.RData"))
+
+check_countries$year <- as.integer(check_countries$year)
+table(check_countries$year)
+sorted_countries <- check_countries %>% group_by(year) %>% arrange(desc(n_views)) %>% slice_head(n=10)
+save(sorted_countries, file = "Figures/sorted_countries_10.RData")
+
+# https://ru.wikipedia.org/wiki/ISO_3166-1 for country codes
 
 ### Which articles are the most popular by year?
 load(here("data", "tat_most_test_2015_2023.RData")) # here, I have to focus on titles without "word:"
+# write_csv(tat_most_test, file = "attempt.csv")
+pattern <- ":"
+tat_most_test$to_remove <- grepl(pattern, tat_most_test$article)
+tat_most_test <- tat_most_test %>% filter(to_remove==FALSE)
+encodeString(tat_most_test$article[997])
+table(Encoding(tat_most_test$article))
 
+library(stringi)
+stri_enc_mark(tat_most_test$article)
+all(stri_enc_isutf8(tat_most_test$article))
+
+
+another_one <- read.csv2(file("attempt.csv", encoding="Latin-1"))
+tat_most_test$article <- stri_encode(tat_most_test$article, "", "windows-1251") # re-mark encodings
+stri_trans_general(tat_most_test$article, "Latin-1")
+df <- read.table("attempt.csv", sep = ",", fileEncoding = "UTF-8", header = TRUE)
 
 
 
