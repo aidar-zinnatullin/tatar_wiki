@@ -53,18 +53,21 @@ load(here("data", "tat_most_test_2015_2023.RData")) # here, I have to focus on t
 pattern <- ":"
 tat_most_test$to_remove <- grepl(pattern, tat_most_test$article)
 tat_most_test <- tat_most_test %>% filter(to_remove==FALSE)
-encodeString(tat_most_test$article[997])
-table(Encoding(tat_most_test$article))
 
-library(stringi)
-stri_enc_mark(tat_most_test$article)
-all(stri_enc_isutf8(tat_most_test$article))
+tat_most_test$year <- str_extract_all(pattern = "(\\d{4})", string = tat_most_test$period)
+tat_most_test$year <- unlist(tat_most_test$year)
 
+check_articles_by_year_10 <- tat_most_test %>% group_by(article, year) %>% transmute(n_views = sum(views)) %>% 
+  filter(article!="Баш_бит") 
 
-another_one <- read.csv2(file("attempt.csv", encoding="Latin-1"))
-tat_most_test$article <- stri_encode(tat_most_test$article, "", "windows-1251") # re-mark encodings
-stri_trans_general(tat_most_test$article, "Latin-1")
-df <- read.table("attempt.csv", sep = ",", fileEncoding = "UTF-8", header = TRUE)
+check_articles_by_year_10 <- check_articles_by_year_10 %>% 
+  filter(article!="xss") 
 
+check_articles_by_year_10 <- check_articles_by_year_10 %>% 
+  filter(article!="Bötendönya_kileşterelgän_waqıtı") 
+
+sorted_articles <- check_articles_by_year_10 %>% group_by(article, year) %>% arrange(desc(n_views)) %>% slice_head(n=10)
+
+sorted_articles <- check_articles_by_year_10 %>% group_by(article, year) %>% arrange(desc(n_views)) %>% slice_head(n=10)
 
 
