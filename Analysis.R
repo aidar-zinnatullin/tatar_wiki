@@ -237,4 +237,67 @@ ggsave(here("Figures", "Articles.jpeg"), width = 12, height = 9, dpi = 300)
 
 
 
+# Statistics for Countries ------------------------------------------------
+
+load(here("Figures","sorted_countries_10.RData"))
+
+
+# Load the required library
+library(rvest)
+
+# URL of the Wikipedia page containing the table you want to scrape
+url <- "https://ru.wikipedia.org/wiki/ISO_3166-1"
+
+# Read the HTML content of the page
+page <- read_html(url)
+
+# Identify the table you want to scrape based on its position or attributes
+# For example, let's say we want to scrape the first table on the page
+table <- page %>%
+  html_nodes("table") %>%
+  .[[1]] %>%
+  html_table()
+
+# Print the scraped table
+print(table)
+
+to_merge <- table[,c(1,2)]
+names(to_merge) <- c("name", "country")
+
+sorted_countries <- left_join(sorted_countries, to_merge, by = "country")
+
+library(tidytext)
+facet_bar <- function(df, y, x, by, nrow = 2, ncol = 2, scales = "free") {
+  mapping <- aes(y = reorder_within({{ y }}, {{ x }}, {{ by }}), 
+                 x = {{ x }}, 
+                 fill = {{ by }})
+  
+  facet <- facet_wrap(vars({{ by }}), 
+                      nrow = nrow, 
+                      ncol = ncol,
+                      scales = scales) 
+  
+  ggplot(df, mapping = mapping) + 
+    geom_col(show.legend = FALSE) + 
+    scale_y_reordered() + 
+    facet + 
+    ylab("")
+}
+names(sorted_countries)
+sorted_countries$country <- NULL
+names(sorted_countries)[3] <- "country"
+
+sorted_countries %>% 
+  group_by(year) %>% 
+  top_n(10) %>%
+  ungroup() %>%
+  facet_bar(y = country, 
+            x = n_views, 
+            by = year, 
+            nrow = 10)+
+  xlab(label = "Количество просмотров")+
+  theme_minimal()
+ggsave(here("Figures", "Countries.jpeg"), width = 12, height = 9, dpi = 300)
+
+
 
