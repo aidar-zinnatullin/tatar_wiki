@@ -1,5 +1,6 @@
 library(here)
 library(tidyverse)
+options(scipen = 999)
 load(here("data", "Daily_Visits.RData"))
 load(here("data", "Monthly_Visits.RData"))
 class(tat_wiki_monthly$views)
@@ -297,7 +298,7 @@ sorted_countries %>%
             nrow = 10)+
   xlab(label = "Количество просмотров")+
   theme_minimal()
-ggsave(here("Figures", "Countries.jpeg"), width = 12, height = 9, dpi = 300)
-
+ggsave(here("Figures", "Countries.jpeg"), width = 14, height = 10, dpi = 300)
+save(sorted_countries, file = "data/countries_ready.RData")
 
 
